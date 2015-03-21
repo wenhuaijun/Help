@@ -1,0 +1,49 @@
+package com.pinsheng.help;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import com.pinsheng.app.HELPActivity;
+import com.pinsheng.util.Util;
+import android.os.Bundle;
+import android.view.KeyEvent;
+
+public class MainActivity extends HELPActivity {
+
+	private static Boolean isExit = false; // 双击退出
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			exitBy2Click();
+			return false;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	private void exitBy2Click() {
+		Timer tExit = null;
+		if (isExit == false) {
+			isExit = true; // 准备退出
+			Util.Toast(MainActivity.this, "再按一下退出！！");
+			tExit = new Timer();
+			tExit.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					isExit = false; // 取消退出
+				}
+			}, 1500);
+
+		} else {
+			finish();
+			System.exit(0);
+		}
+	}
+
+}

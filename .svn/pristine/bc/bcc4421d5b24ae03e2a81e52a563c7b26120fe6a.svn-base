@@ -1,0 +1,290 @@
+package com.pinsheng.map;
+
+import java.util.LinkedList;
+import android.app.ActionBar;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ZoomControls;
+import com.android.http.LoadControler;
+import com.android.http.RequestManager;
+import com.android.http.RequestManager.RequestListener;
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMap.OnMapClickListener;
+import com.baidu.mapapi.map.BaiduMap.OnMarkerClickListener;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.MyLocationConfiguration;
+import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.PolylineOptions;
+import com.baidu.mapapi.map.InfoWindow.OnInfoWindowClickListener;
+import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
+import com.baidu.mapapi.model.LatLng;
+import com.google.gson.Gson;
+import com.pinsheng.app.HELPActivity;
+import com.pinsheng.help.R;
+import com.pinsheng.mode.DetailRecord;
+import com.pinsheng.mode.ImeiPosition;
+import com.pinsheng.mode.ImeiPosition.ImeiData;
+import com.pinsheng.mode.Params;
+import com.pinsheng.util.Constant;
+import com.pinsheng.util.Util;
+
+public class MapActivity extends HELPActivity implements OnClickListener {
+	private MapView mMapView;
+	private Button myLocation;
+	private Button bearLocation;
+
+	private BaiduMap mBaiduMap;
+	private LocationClient mLocClient;
+	private LoadControler mImeiControler = null;
+	private InfoWindow mInfoWindow;
+	private BitmapDescriptor bitmap = BitmapDescriptorFactory
+			.fromResource(R.drawable.icon_marka);
+	private static final float DEFAULTZOOM = 19.0f;
+
+	private LinkedList<LatLng> line;
+	private String imei;
+	private String location;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_map);
+		ActionBar actionBar = this.getActionBar();
+		actionBar.setIcon(R.drawable.ic_return);
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setTitle("求救者活动范围");
+
+		mMapView = (MapView) findViewById(R.id.bmapView);
+		myLocation = (Button) findViewById(R.id.btn_mylocation);
+		bearLocation = (Button) findViewById(R.id.btn_bearlocation);
+
+		myLocation.setOnClickListener(this);
+		bearLocation.setOnClickListener(this);
+		initData();
+	}
+
+	private void initData() {
+		imei = this.getIntent().getExtras().getString("IMEI");
+		mBaiduMap = mMapView.getMap();
+		mBaiduMap.setMyLocationEnabled(true);
+		location = this.getIntent().getExtras().getString("LOCATION");
+
+		mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(
+				LocationMode.NORMAL, true, null));
+
+		mLocClient = new LocationClient(this);
+		LocationClientOption option = new LocationClientOption();
+		option.setOpenGps(true);// 打开gps
+		option.setCoorType("gcj02"); // 设置坐标类型
+		mLocClient.setLocOption(option);
+
+		mLocClient.registerLocationListener(new BDLocationListener() {
+
+			@Override
+			public void onReceiveLocation(BDLocation location) {
+				if (location == null || mMapView == null)
+					return;
+				Log.i("cao", "caodan");
+				MyLocationData locData = new MyLocationData.Builder()
+						.accuracy(location.getRadius()).direction(100)
+						.latitude(location.getLatitude())
+						.longitude(location.getLongitude()).build();
+				mBaiduMap.setMyLocationData(locData);
+				LatLng ll = new LatLng(location.getLatitude(), location
+						.getLongitude());
+				MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(ll);
+				mBaiduMap.animateMapStatus(u);
+			}
+		});
+
+		MapStatusUpdate f = MapStatusUpdateFactory.zoomTo(DEFAULTZOOM);
+		mBaiduMap.animateMapStatus(f);
+		int childCount = mMapView.getChildCount();
+		View zoom = null;
+		for (int i = 0; i < childCount; i++) {
+			View child = mMapView.getChildAt(i);
+			if (child instanceof ZoomControls) {
+				zoom = child;
+				break;
+			}
+		}
+		zoom.setVisibility(View.GONE);
+		PostDangerousImei(imei);
+		mBaiduMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+
+			@Override
+			public boolean onMarkerClick(Marker marker) {
+				Bundle mark = marker.getExtraInfo();
+				if (mark == null) {
+					return true;
+				}
+
+				DetailRecord dr = (DetailRecord) mark.getSerializable("marker");
+
+				Button button = new Button(MapActivity.this);
+				button.setBackgroundResource(R.drawable.popup);
+				OnInfoWindowClickListener listener = null;
+
+				if (dr != null) {
+					button.setText("地理位置：" + dr.getLocation() + "\n" + "时间："
+							+ dr.getTime());
+					listener = new OnInfoWindowClickListener() {
+						public void onInfoWindowClick() {
+							mBaiduMap.hideInfoWindow();
+						}
+					};
+					LatLng ll = marker.getPosition();
+					mInfoWindow = new InfoWindow(BitmapDescriptorFactory
+							.fromView(button), ll, -47, listener);
+					mBaiduMap.showInfoWindow(mInfoWindow);
+				}
+				return true;
+			}
+		});
+
+		mBaiduMap.setOnMapClickListener(new OnMapClickListener() {
+
+			@Override
+			public boolean onMapPoiClick(MapPoi arg0) {
+				return false;
+			}
+
+			@Override
+			public void onMapClick(LatLng arg0) {
+				if (mInfoWindow != null) {
+					mBaiduMap.hideInfoWindow();
+				}
+			}
+		});
+	}
+
+	private void drawLine(LatLng now, LatLng last) {
+		line = new LinkedList<LatLng>();
+		line.add(now);
+		line.add(last);
+		if (mBaiduMap != null) {
+			OverlayOptions ooPolyline = new PolylineOptions().width(10)
+					.color(0xAAFF0000).points(line);
+			mBaiduMap.addOverlay(ooPolyline);
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mImeiControler != null) {
+			mImeiControler.cancel();
+		}
+	}
+
+	private void PostDangerousImei(String imei) {
+		Params params = new Params(imei);
+		mImeiControler = RequestManager.getInstance().post(
+				Constant.URL_IMEI_POSITION, params.toString(),
+				new RequestListener() {
+
+					@Override
+					public void onSuccess(String response, String url,
+							int actionId) {
+						ImeiPosition imei = new Gson().fromJson(response,
+								ImeiPosition.class);
+						switch (imei.getStatus()) {
+						case 200:
+							ImeiData[] imeis = imei.getData();
+							Log.i("cao12", "imeis[imeis.length - 1].getWeidu()"
+									+ imeis[imeis.length - 1].getWeidu());
+							Log.i("cao12", "imeis[imeis.length - 1].getJingdu()"
+									+ imeis[imeis.length - 1].getJingdu());
+							LatLng point = new LatLng(imeis[imeis.length - 1]
+									.getWeidu(), imeis[imeis.length - 1]
+									.getJingdu());
+							OverlayOptions option = new MarkerOptions()
+									.position(point).icon(bitmap)
+									.perspective(false).zIndex(10)
+									.anchor(1.5f, 1.5f);
+							Bundle b = new Bundle();
+							b.putSerializable(
+									"marker",
+									new DetailRecord(imeis[imeis.length - 1]
+											.getTime(), location));
+							mBaiduMap.addOverlay(option).setExtraInfo(b);
+							MapStatusUpdate u = MapStatusUpdateFactory
+									.newLatLng(point);
+							mBaiduMap.animateMapStatus(u);
+							for (int i = 0; i < imeis.length - 1; i++) {
+								LatLng now = new LatLng(imeis[i].getWeidu(),
+										imeis[i].getJingdu());
+								LatLng Last = new LatLng(imeis[i + 1]
+										.getWeidu(), imeis[i + 1].getJingdu());
+								drawLine(now, Last);
+							}
+							break;
+
+						default:
+							Util.Toast(MapActivity.this, "未能获取到详细信息");
+							break;
+						}
+					}
+
+					@Override
+					public void onRequest() {
+
+					}
+
+					@Override
+					public void onError(String errorMsg, String url,
+							int actionId) {
+						Util.Toast(MapActivity.this, "未能获取到详细信息");
+					}
+				}, 0);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_mylocation:
+			if (mLocClient.isStarted()) {
+				mLocClient.stop();
+				mLocClient.start();
+			} else {
+				mLocClient.start();
+			}
+			break;
+		case R.id.btn_bearlocation:
+			PostDangerousImei(imei);
+			break;
+
+		default:
+			break;
+		}
+	}
+}

@@ -1,0 +1,132 @@
+package com.pinsheng.map;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.pinsheng.help.R;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+
+public class SearchActivity extends Activity implements OnItemClickListener {
+	private ListView mListView;
+
+	private MyAdapter adapter;
+	private Intent intent;
+	private List<Map<String, String>> arry;
+	private String[] strName;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_search);
+		initData();
+		initView();
+	}
+
+	private void initView() {
+		mListView = (ListView) findViewById(R.id.list_search);
+
+		mListView.setAdapter(adapter);
+		mListView.setOnItemClickListener(this);
+	}
+
+	private void initData() {
+		intent = new Intent();
+
+		strName = getResources().getStringArray(R.array.search_item);
+		arry = new ArrayList<Map<String, String>>();
+		for (int i = 0; i < strName.length; i++) {
+			Map<String, String> hash = new HashMap<String, String>();
+			hash.put("img", R.drawable.near + "");
+			hash.put("title", strName[i]);
+			arry.add(hash);
+		}
+		adapter = new MyAdapter(arry, SearchActivity.this);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		switch (position) {
+		case 0:
+			intent.setClass(this, MapActivity.class);
+			startActivity(intent);
+			break;
+		case 1:
+			intent.setClass(this, MapActivity.class);
+			startActivity(intent);
+			break;
+
+		default:
+			break;
+		}
+	}
+}
+
+class MyAdapter extends BaseAdapter {
+	private List<Map<String, String>> mItem;
+	private Context context;
+
+	public MyAdapter(List<Map<String, String>> mItem, Context context) {
+		this.mItem = mItem;
+		this.context = context;
+	}
+
+	@Override
+	public int getCount() {
+		return mItem.size();
+	}
+
+	@Override
+	public Object getItem(int arg0) {
+		return mItem.get(arg0);
+	}
+
+	@Override
+	public long getItemId(int arg0) {
+		return arg0;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View rootView;
+		ViewHolder viewHolder;
+		if (convertView == null) {
+			viewHolder = new ViewHolder();
+			rootView = LayoutInflater.from(context).inflate(
+					R.layout.item_search, parent, false);
+			viewHolder.mNameText = (TextView) rootView
+					.findViewById(R.id.txt_near);
+			viewHolder.mHeadImage = (ImageView) rootView
+					.findViewById(R.id.img_icon);
+			rootView.setTag(viewHolder);
+		} else {
+			rootView = convertView;
+			viewHolder = (ViewHolder) rootView.getTag();
+		}
+		viewHolder.mNameText.setText(mItem.get(position).get("title"));
+		viewHolder.mHeadImage.setImageResource(Integer.parseInt(mItem.get(
+				position).get("img")));
+		return rootView;
+	}
+
+	private class ViewHolder {
+		private TextView mNameText;
+		private ImageView mHeadImage;
+	}
+
+}

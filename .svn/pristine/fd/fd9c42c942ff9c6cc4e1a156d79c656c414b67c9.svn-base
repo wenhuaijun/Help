@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">失联终结者</string>
+
+    <!-- activity_main -->
+    <string name="location">位置:获取中...</string>
+
+    <!-- help_add_main -->
+    <string name="help_add_main_text_null">暂无</string>
+    <string name="shake_switch">震动感应</string>
+
+    <!-- fragment_set_up_dialog -->
+    <string name="setup_name">姓名：</string>
+    <string name="setup_phone">电话：</string>
+    <string name="setup_address">通讯录</string>
+    <string name="setup_emergencytouch">紧急触发</string>
+    <string name="setup_emergencyphone">紧急电话</string>
+    <string name="setup_emergencymessage">紧急短信</string>
+    <string name="setup_messagecontent">短信内容</string>
+    <string name="setup_delete">删除</string>
+    <string name="setup_save">保存</string>
+    <string name="setup_hintmessage">默认:我现在遇到危险，赶快来救我！</string>
+
+</resources>

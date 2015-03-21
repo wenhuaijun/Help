@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingBottom="8dp"
+    android:orientation="vertical" >
+    <RelativeLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:background="@drawable/trouble_listview_item_background"
+        >
+        <TextView 
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="文怀俊"
+            android:textSize="18sp"
+            />
+        <TextView 
+            android:id="@+id/data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="2015-03-18 14:32:53"
+            android:textColor="#9D9D9D"
+            />
+        <TextView 
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_below="@+id/name"
+            android:textColor="#6C6C6C"
+            android:text="我可能遇到危险，现在不方便打电话，如果10分钟内我没联系你，请帮助我。谢谢啊啊啊啊啊啊 啊啊"
+            />
+    </RelativeLayout>
+
+</LinearLayout>

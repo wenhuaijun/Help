@@ -1,0 +1,9 @@
+package com.pinsheng.util;
+
+public class Constant {
+	/**
+	 * 保存在缓存的sharepreferce文件名
+	 */
+	public final static String LOCAL_SP= "helps";
+	public final static String LOCAL_FIRST_LOGIN="isFirstLogin";
+}

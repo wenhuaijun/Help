@@ -1,0 +1,236 @@
+package com.pinsheng.service;
+
+import java.util.List;
+
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationListener;
+import com.amap.api.location.LocationManagerProxy;
+import com.amap.api.location.LocationProviderProxy;
+import com.android.http.RequestManager;
+import com.android.http.RequestManager.RequestListener;
+import com.google.gson.Gson;
+import com.pinsheng.app.HELPApllication;
+import com.pinsheng.help.HELPFragment;
+import com.pinsheng.help.MainActivity;
+import com.pinsheng.help.R;
+import com.pinsheng.mode.Person;
+import com.pinsheng.mode.RESULT;
+import com.pinsheng.mode.Position;
+import com.pinsheng.util.Constant;
+import com.pinsheng.util.Util;
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.PowerManager;
+import android.os.Vibrator;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+
+public class HelpService extends Service implements SensorEventListener,AMapLocationListener {
+	private SensorManager sensorManager;
+	private Sensor accelerateSensor;
+	private NotificationManager notificationManager;
+	private NotificationCompat.Builder mBduilder;
+	private Notification notification;
+	public static LocationManagerProxy mLocationManagerProxy;
+	public static int count = 0;
+
+	@Override
+	public void onCreate() {
+		Log.i("response", "----->onCreat");
+		notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		mBduilder = new NotificationCompat.Builder(this);
+		mBduilder.setSmallIcon(R.drawable.ic_launcher);
+		mBduilder.setContentTitle("失联小助手");
+		mBduilder.setContentText("失联小助手开启");
+		mBduilder.setTicker("失联小助手");
+		Intent i = new Intent(this, MainActivity.class);   
+		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		mBduilder.setContentIntent(contentIntent);
+		notification = mBduilder.build();
+		notification.flags = Notification.FLAG_ONGOING_EVENT;
+		notificationManager.notify(0, notification);
+		
+		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		accelerateSensor = sensorManager
+				.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		mLocationManagerProxy =  LocationManagerProxy.getInstance(this);
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.i("response", "----->onstartCommand");
+		flags = START_STICKY;
+		if(((HELPApllication)getApplication()).isHelping()){
+			if(mLocationManagerProxy!=null){
+				mLocationManagerProxy.removeUpdates(this);
+				mLocationManagerProxy.destroy();
+			}
+			mLocationManagerProxy = LocationManagerProxy.getInstance(this);
+			mLocationManagerProxy.setGpsEnable(false);
+			Log.i("cao","mLocation:" + mLocationManagerProxy);
+			mLocationManagerProxy.requestLocationData(LocationProviderProxy.AMapNetwork, 10*1000, 15, HelpService.this);
+		}
+			sensorManager.registerListener(this, accelerateSensor,
+					SensorManager.SENSOR_DELAY_GAME);
+		return super.onStartCommand(intent, flags, startId);
+	}
+
+	@Override
+	public void onDestroy() {
+		Log.i("response", "----->onDestroy");
+		if(sensorManager != null) {
+			sensorManager.unregisterListener(this);
+		}
+		notificationManager.cancelAll();
+		if(mLocationManagerProxy!=null){
+			//移除定位请求
+			mLocationManagerProxy.removeUpdates(this);
+			// 销毁定位
+			mLocationManagerProxy.destroy();
+		}
+		super.onDestroy();
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+
+		float[] values = event.values;
+
+		float x = values[0];
+		float y = values[1];
+		float z = values[2];
+		int medumValue = 16;
+		PowerManager pm = (PowerManager) this
+				.getSystemService(Context.POWER_SERVICE);
+		if (pm.isScreenOn()) {
+			if (Math.abs(x) > medumValue || Math.abs(y) > medumValue
+					|| Math.abs(z) > medumValue) {
+				if (Util.ShakeQuickClick.isQuickClick()) {
+					return;
+				} else {
+					count++;
+					if (count == 3) {
+						List<Person> person = ((HELPApllication) (getApplication()))
+								.getPersons();
+						if (person.size() == 0) {
+							Util.Toast(this, "你还没设置联系人呢");
+						} else {
+							((Vibrator) getSystemService(VIBRATOR_SERVICE))
+									.vibrate(new long[] { 500, 480, 500, 480 },
+											-1);	
+							Util.send(this, person, ((HELPApllication) (getApplication())).getLocation(),((HELPApllication) (getApplication())).getImei());
+							Util.Call(this, person);
+							Util.Toast(this, "检测到摇晃，发送短信和拨打电话！");
+							Log.i("responce", "------->change UI");
+							count = 0;
+							Message msg = new Message();
+							msg.what=3;
+							HELPFragment.handler.sendMessage(msg);
+							((HELPApllication)getApplication()).setIsHelping(true);
+							((HELPApllication)getApplication()).setHelping(true);
+							
+							// 设置位置请求
+							
+							if(mLocationManagerProxy!=null){
+								mLocationManagerProxy.removeUpdates(this);
+								mLocationManagerProxy.destroy();
+							}
+							mLocationManagerProxy = LocationManagerProxy.getInstance(this);
+							mLocationManagerProxy.setGpsEnable(false);
+							Log.i("cao","mLocation:" + mLocationManagerProxy);
+							mLocationManagerProxy.requestLocationData(LocationProviderProxy.AMapNetwork, 10*1000, 15, HelpService.this);
+							
+									
+						}
+							
+						}
+					}
+				}
+			}
+		}
+	
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		
+	}
+
+	@Override
+	public void onLocationChanged(AMapLocation amapLocation) {
+		if (amapLocation!=null&&amapLocation.getAMapException().getErrorCode() == 0) {
+			Log.i("response","维度: "+ amapLocation.getLatitude());
+			Log.i("response","经度: "+ amapLocation.getLongitude());
+			Log.i("response","识别码: "+ ((HELPApllication) (getApplication())).getImei());
+			((HELPApllication)getApplication()).setLocation(amapLocation.getAddress());
+			upLoadZuoBiao(amapLocation.getLatitude(),amapLocation.getLongitude(), ((HELPApllication) (getApplication())).getImei(),amapLocation.getAddress());
+		}
+	}
+
+	private void upLoadZuoBiao(double latitude, double longitude, String imei,String address) {
+		Position zuoBiao = new Position(longitude, latitude, imei,address);
+		RequestManager.getInstance().post(Constant.URL_UPLOAD_POSITION, zuoBiao.toString(), new RequestListener() {
+			
+			@Override
+			public void onSuccess(String response, String url, int actionId) {
+				RESULT result = new Gson().fromJson(response, RESULT.class);
+				if(result.getStatus()==200){
+					Log.i("response", "上传位置成功！");
+				}else{
+					Log.i("response", "上传位置失败！");
+				}
+				
+			}
+			
+			@Override
+			public void onRequest() {
+				
+			}
+			
+			@Override
+			public void onError(String errorMsg, String url, int actionId) {
+				
+			}
+		}, 0);
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
+	
+}

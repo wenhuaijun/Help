@@ -1,0 +1,76 @@
+package com.pinsheng.mode;
+
+public class DangerousaAll {
+	private int status;
+	private Data[] data;
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public Data[] getData() {
+		return data;
+	}
+
+	public void setData(Data[] data) {
+		this.data = data;
+	}
+
+	public class Data {
+		private String imei;
+		private double jingdu;
+		private double wedu;
+		private String address;
+		private String time;
+
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
+		}
+
+		public void setWedu(double wedu) {
+			this.wedu = wedu;
+		}
+
+		public String getImei() {
+			return imei;
+		}
+
+		public void setImei(String imei) {
+			this.imei = imei;
+		}
+
+		public double getJingdu() {
+			return jingdu;
+		}
+
+		public void setJingdu(double jingdu) {
+			this.jingdu = jingdu;
+		}
+
+		public double getWedu() {
+			return wedu;
+		}
+
+		public void setWedu(float wedu) {
+			this.wedu = wedu;
+		}
+
+		public String getTime() {
+			return time;
+		}
+
+		public void setTime(String time) {
+			this.time = time;
+		}
+	}
+
+}

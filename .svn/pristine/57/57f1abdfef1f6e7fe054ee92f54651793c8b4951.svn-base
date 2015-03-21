@@ -1,0 +1,28 @@
+package com.pinsheng.mode;
+
+import com.google.gson.Gson;
+
+public class Params {
+	private String imei;
+
+	public Params() {
+		
+	}
+	
+	public Params(String imei) {
+		this.imei = imei;
+	}
+
+	public String getImei() {
+		return imei;
+	}
+
+	public void setImei(String imei) {
+		this.imei = imei;
+	}
+
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
+}

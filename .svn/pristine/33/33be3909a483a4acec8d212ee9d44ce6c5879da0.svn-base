@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="transparent">#00000000</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="gray_main">#212121</color>
+    <color name="main_Bg">#f73f01</color>
+    <color name="gray_background">#E0E0E0</color>
+    <color name="graybg_deep">#dedbdb</color>
+    <color name="actionBarBg">#D20F1E</color>
+    
+    <color name="GRAY">#eeeeee</color>
+
+</resources>

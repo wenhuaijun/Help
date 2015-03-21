@@ -1,0 +1,17 @@
+package com.pinsheng.util;
+
+public class Constant {
+	/**
+	 * 保存在缓存的sharepreferce文件名
+	 */
+	public final static String LOCAL_SP= "helps";
+	public final static String LOCAL_FIRST_LOGIN="isFirstLogin";
+	
+	/**
+	 * 网络
+	 */
+	public final static String URL_AROUD_DANGEROUS = "http://danger.wangdao.hk/around.php";
+	public final static String URL_UPLOAD_POSITION="http://danger.wangdao.hk/uploadposition.php";
+	public final static String URL_IMEI_POSITION="http://danger.wangdao.hk/getposition.php";
+	public final static String URL_REQUEST_UPLOAD_POSITION="http://danger.wangdao.hk/release.php";
+}

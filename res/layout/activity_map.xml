@@ -1,0 +1,39 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.android_drawmap.MainActivity" >
+
+    <com.baidu.mapapi.map.MapView
+        android:id="@+id/bmapView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:clickable="true"/>
+    
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/btn_mylocation"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
+            android:background="#aaffffff"
+            android:padding="8dp"
+            android:text="我的位置" />
+
+        <Button
+            android:id="@+id/btn_bearlocation"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_margin="8dp"
+            android:background="#aaffffff"
+            android:padding="8dp"
+            android:text="失联位置" />
+
+    </LinearLayout>
+
+</RelativeLayout>

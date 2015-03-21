@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/little_gray"
+    android:orientation="vertical" >
+    <RelativeLayout 
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#ffffff"
+        >
+        <ImageView
+            android:id="@+id/record_return"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_return"
+            android:layout_centerVertical="true"
+            />
+        <TextView 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="已发送短信"
+            android:layout_marginLeft="2dp"
+            android:textSize="20sp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/record_return"
+            />
+    </RelativeLayout>
+  <ListView 
+      android:layout_marginTop="8dp"
+      android:id="@+id/record_listView"
+      android:layout_width="match_parent"
+      android:divider="@null"
+      android:layout_height="match_parent"
+      ></ListView>  
+
+</LinearLayout>

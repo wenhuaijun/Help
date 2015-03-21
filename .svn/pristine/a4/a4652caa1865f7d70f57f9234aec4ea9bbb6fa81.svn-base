@@ -1,0 +1,253 @@
+package com.pinsheng.view;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.pinsheng.help.R;
+import com.pinsheng.mode.Person;
+import com.pinsheng.util.Util;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+public class CircleView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener {
+	private LayoutInflater mInflater = LayoutInflater.from(getContext());
+	private ImageButton mMainButton;
+	private ArrayList<View> mAroundView = new ArrayList<View>();
+	private View mAddView;
+	private View mHelpProgressView;
+	private final int RADIUS_BUTTON = Util.dip2px(getContext(), 100);
+	private final int RADIUS_CIRCLE = Util.dip2px(getContext(), 132);
+	private OnCircleViewClickListener mListener;
+	private ImageView imgprogressImageView;
+
+	public ImageView getImgprogressImageView() {
+		return imgprogressImageView;
+	}
+
+
+	public void setImgprogressImageView(ImageView imgprogressImageView) {
+		this.imgprogressImageView = imgprogressImageView;
+	}
+
+
+	public CircleView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		mHelpProgressView = getMainProgressView();
+		addView(mHelpProgressView);
+		mHelpProgressView.setVisibility(View.INVISIBLE);
+		initMainView();
+		initAddView();
+	}
+
+
+	private View getMainProgressView() {
+		Log.i("progress", "progress");
+		View view = LayoutInflater.from(getContext()).inflate(R.layout.help_progress, this, false);
+		imgprogressImageView = (ImageView) view.findViewById(R.id.main_help_progress);
+		imgprogressImageView.setImageResource(R.drawable.progress);
+		return view;
+	}
+
+
+	public ImageButton getmMainButton() {
+		return mMainButton;
+	}
+
+	public void setmMainButton(ImageButton mMainButton) {
+		this.mMainButton = mMainButton;
+	}
+
+	private void initMainView() {
+		mMainButton = new ImageButton(getContext());
+		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RADIUS_BUTTON * 2, RADIUS_BUTTON * 2);
+		mMainButton.setLayoutParams(lp);
+		mMainButton.setScaleType(ScaleType.FIT_XY);
+		mMainButton.setBackgroundColor(Color.TRANSPARENT);
+		mMainButton.setImageResource(R.drawable.main_helps_btn);
+		mMainButton.setOnLongClickListener(this);
+		mMainButton.setOnClickListener(this);
+		mMainButton.setOnTouchListener(this);
+		mMainButton.setTag("mMainButton");
+		addView(mMainButton);
+	}
+
+	private void initAddView() {
+		mAddView = creatItemView(R.drawable.main_add, "");
+		addView(mAddView);
+	}
+
+	public void setOnCircleViewClickListener(OnCircleViewClickListener mListerner) {
+		this.mListener = mListerner;
+	}
+
+	public void addPerson(Person person) {
+		if (person == null) {
+			return;
+		}
+		int imgres = R.drawable.main_null;
+		int imgresIndex = 0;
+
+		if (person.isPhone()) {
+			imgresIndex += 2;
+		}
+		if (person.isMessage()) {
+			imgresIndex += 4;
+		}
+		switch (imgresIndex) {
+		case 0:// 不打电话+不发短信
+			imgres = R.drawable.main_null;
+			break;
+		case 2:// 仅打电话
+			imgres = R.drawable.main_phone;
+			break;
+		case 4:// 仅短信
+			imgres = R.drawable.main_message;
+			break;
+		case 6:// 打电话+短信
+			imgres = R.drawable.main_phone_message;
+			break;
+		}
+		View itemView = creatItemView(imgres, person.getName());
+		itemView.setTag(person);
+		mAroundView.add(itemView);
+		addView(itemView);
+	}
+
+	public void addPerson(List<Person> persons) {
+		if (persons != null) {
+			for (Person temp : persons) {
+				addPerson(temp);
+			}
+		}
+	}
+
+	public void removeAllPerson() {
+		for (View itemView : mAroundView) {
+			removeView(itemView);
+		}
+		mAroundView.clear();
+		requestLayout();
+	}
+
+	private View creatItemView(int resId, String hint) {
+		View itemView = mInflater.inflate(R.layout.circleview_item, this, false);
+		((ImageView) itemView.findViewById(R.id.img)).setImageResource(resId);
+		((TextView) itemView.findViewById(R.id.hint)).setText(hint);
+		itemView.setOnClickListener(this);
+		return itemView;
+	}
+
+	private Rect getItemPosition(View view, int index) {
+		double angle = Math.PI / 3 * index;
+		int cx = (int) (getMeasuredWidth() / 2 + (Math.sin(angle) * RADIUS_CIRCLE));
+		int cy = (int) (getMeasuredHeight() / 2 - (Math.cos(angle) * RADIUS_CIRCLE));
+		int x = cx - view.getMeasuredWidth() / 2;
+		int y = cy - view.getMeasuredHeight() / 2;
+		int r = cx + view.getMeasuredWidth() / 2;
+		int b = cy + view.getMeasuredHeight() / 2;
+		return new Rect(x, y, r, b);
+	}
+
+	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		int bottom = b - t;
+		int right = r - l;
+		// layout MainButton
+		mMainButton.layout(right / 2 - mMainButton.getMeasuredWidth() / 2, bottom / 2 - mMainButton.getMeasuredHeight() / 2,
+				right / 2 + mMainButton.getMeasuredWidth() / 2, bottom / 2 + mMainButton.getMeasuredHeight() / 2);
+
+		// layout mHelpProgressView
+		if (mHelpProgressView != null) {
+			mHelpProgressView.layout(right / 2 - mMainButton.getMeasuredWidth() / 2, bottom / 2 - mMainButton.getMeasuredHeight() / 2 , right / 2
+					+ mMainButton.getMeasuredWidth() / 2, bottom / 2 + mMainButton.getMeasuredHeight() / 2 );
+		}
+
+		// layout ItemView
+		for (int i = 0; i < mAroundView.size(); i++) {
+			Rect rect = getItemPosition(mAroundView.get(i), i);
+			mAroundView.get(i).layout(rect.left, rect.top, rect.right, rect.bottom);
+		}
+
+		// layout AddView
+		if (mAroundView.size() < 6) {
+			Rect rect = getItemPosition(mAddView, mAroundView.size());
+			mAddView.layout(rect.left, rect.top, rect.right, rect.bottom);
+		}
+	}
+
+	public void setOnMainImageViewListerner(OnCircleViewClickListener mListener) {
+		this.mListener = mListener;
+	}
+
+	public interface OnCircleViewClickListener {
+		public void OnPersonClick(Person person);
+
+		public void OnProgressAnimation(ImageView imageView);
+
+		public void OnCancleAnimation(ImageView imageView);
+		
+		public void OnMainClick();
+
+		public void OnAddClick();
+		public void OnMainRequestHelpClick();
+	}
+
+	@Override
+	public void onClick(View arg0) {
+		if (mListener == null) {
+			return;
+		}
+		if (arg0.getTag() == null) {
+			mListener.OnAddClick();
+			return;
+		}
+		
+		if (arg0.getTag() instanceof Person) {
+			mListener.OnPersonClick((Person) arg0.getTag());
+			return;
+		}
+		if(arg0.getTag().equals("mMainButton")){
+			mListener.OnMainRequestHelpClick();
+			return;
+		}
+	}
+
+	@Override
+	public boolean onLongClick(View view) {
+		Log.i("onLongClick", "onLongClick");
+		mListener.OnMainClick();
+		return false;
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			mListener.OnProgressAnimation(imgprogressImageView);
+			break;
+			
+		case MotionEvent.ACTION_UP:
+			mListener.OnCancleAnimation(imgprogressImageView);
+			break;
+		default:
+			break;
+		}
+		return false;
+	}
+	
+}

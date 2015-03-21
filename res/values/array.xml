@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="search_item">
+        <item>周边搜索</item>
+        <item>SIM号搜索</item>
+    </string-array>
+	 <string-array name="spinner_more">
+	    <item>使用帮助</item>
+        <item>分享应用</item>
+        <item>求救记录</item>
+        <item>相关设置</item>
+        </string-array>
+</resources>

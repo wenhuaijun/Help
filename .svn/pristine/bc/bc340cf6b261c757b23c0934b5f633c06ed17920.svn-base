@@ -1,0 +1,31 @@
+package com.pinsheng.mode;
+
+import com.google.gson.Gson;
+
+public class ZuoBiao {
+	private String jingdu;
+	private String weidu;
+	private String imei;
+	public String getJingdu() {
+		return jingdu;
+	}
+	public void setJingdu(String jingdu) {
+		this.jingdu = jingdu;
+	}
+	public String getWeidu() {
+		return weidu;
+	}
+	public void setWeidu(String weidu) {
+		this.weidu = weidu;
+	}
+	public String getImei() {
+		return imei;
+	}
+	public void setImei(String imei) {
+		this.imei = imei;
+	}
+	@Override
+	public String toString() {
+		return new Gson().toJson(this);
+	}
+}

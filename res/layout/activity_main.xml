@@ -1,0 +1,60 @@
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <RelativeLayout
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="48dp" 
+        >
+        
+        <TextView 
+            android:id="@+id/main_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="20sp"
+            android:layout_marginLeft="8dp"
+            android:layout_centerVertical="true"
+            style="@style/AcBar_titleStyle"
+            />
+        <ImageView 
+            android:id="@+id/main_more"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/more"
+            android:layout_alignParentRight="true"
+            />
+        <RelativeLayout 
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true"
+            >
+            <ImageView 
+                android:id="@+id/tab_help"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:src="@drawable/tab_help_press"
+                />
+
+            <ImageView
+                android:id="@+id/tab_around"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/tab_help"
+                android:layout_centerVertical="true"
+                android:src="@drawable/tab_around" />
+            
+        </RelativeLayout>
+    </RelativeLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+       />
+</LinearLayout>

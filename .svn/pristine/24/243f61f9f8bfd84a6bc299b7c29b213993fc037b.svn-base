@@ -1,0 +1,63 @@
+package com.pinsheng.mode;
+
+
+public class ImeiPosition {
+	private int status;
+	private ImeiData[] data;
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public ImeiData[] getData() {
+		return data;
+	}
+
+	public void setData(ImeiData[] data) {
+		this.data = data;
+	}
+
+	public class ImeiData {
+		private String imei;
+		private double jingdu;
+		private double weidu;
+		private String time;
+
+		public String getImei() {
+			return imei;
+		}
+
+		public void setImei(String imei) {
+			this.imei = imei;
+		}
+
+		public double getJingdu() {
+			return jingdu;
+		}
+
+		public void setJingdu(double jingdu) {
+			this.jingdu = jingdu;
+		}
+
+		public double getWeidu() {
+			return weidu;
+		}
+
+		public void setWeidu(double weidu) {
+			this.weidu = weidu;
+		}
+
+		public String getTime() {
+			return time;
+		}
+
+		public void setTime(String time) {
+			this.time = time;
+		}
+
+	}
+}

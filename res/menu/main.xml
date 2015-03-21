@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.pinsheng.help.MainActivity" >
+<item android:id="@+id/menu_1"
+                android:title="使用帮助"/>
+    <item android:id="@+id/menu_2" 
+            android:title="分享应用" /> 
+<item android:id="@+id/menu_3"
+                android:title="求救记录"/>
+    <item android:id="@+id/menu_4" 
+            android:title="相关设置" /> 
+</menu>

@@ -1,0 +1,64 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/main_help_bg"
+    tools:context="com.app.aidgirl.MainActivity" >
+
+    <ImageView
+        android:id="@+id/img_earth"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="8dp"
+        android:src="@drawable/earth" />
+
+    <TextView
+        android:id="@+id/main_address_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/img_earth"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:drawableLeft="@drawable/main_address"
+        android:gravity="center_vertical"
+        android:textColor="#ffffff"
+        android:textSize="13sp" />
+
+    <com.pinsheng.view.CircleView
+        android:id="@+id/help_img"
+        android:layout_width="match_parent"
+        android:layout_height="364dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="8dp" >
+    </com.pinsheng.view.CircleView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:background="#dddddd"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="震动感应"
+            android:textSize="17sp"
+            android:textColor="@color/black" />
+
+        <com.slider.slider_switch.Slider_Switch
+            android:id="@+id/shake_switch"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            app:startColor="#000000"
+            app:endColor="@color/main_Bg" />
+    </LinearLayout>
+
+</RelativeLayout>

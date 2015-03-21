@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ptr="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@color/GRAY"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/search_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edit_bg"
+            android:drawableStart="@drawable/search"
+            android:hint="通过id搜索"
+            android:singleLine="true"
+            android:inputType="numberDecimal"
+            android:paddingLeft="8dp"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/search_text"
+            android:layout_width="54dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="16dp"
+            android:gravity="center"
+            android:text="搜索"
+            android:textColor="@color/main_Bg"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <com.handmark.pulltorefresh.library.PullToRefreshListView
+            android:id="@+id/pullToRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:listSelector="#00000000"
+            ptr:ptrDrawableEnd="@null"
+            ptr:ptrHeaderTextAppearance="@style/pullToRefreshViewText"
+            ptr:ptrMode="both"
+            ptr:ptrOverScroll="false"
+            ptr:ptrScrollingWhileRefreshingEnabled="true"
+            ptr:ptrShowIndicator="false"
+            ptr:ptrSubHeaderTextAppearance="@style/pullToRefreshViewSubText" />
+
+        <ProgressBar
+            android:id="@+id/search_gonepro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
+
+</LinearLayout>

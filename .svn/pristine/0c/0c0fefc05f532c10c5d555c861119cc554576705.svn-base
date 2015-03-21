@@ -1,0 +1,112 @@
+package com.pinsheng.help;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import com.pinsheng.app.HELPActivity;
+import com.pinsheng.util.Util;
+
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.os.Bundle;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+
+public class MainActivity extends HELPActivity {
+
+	private FragmentManager mFragmentManager;
+	private ViewPager viewPage;
+
+	private static Boolean isExit = false; // 双击退出
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		initFragment();
+
+		viewPage = (ViewPager) findViewById(R.id.viewpage_main);
+		viewPage.setAdapter(new MyVpAdapter(mFragmentManager));
+	}
+
+	private void initFragment() {
+		mFragmentManager = getFragmentManager();
+		mFragmentManager.beginTransaction().add(new HELPFragment(), "10")
+				.commit();
+		mFragmentManager.beginTransaction()
+				.add(new LocationFragment(), "11").commit();
+
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			exitBy2Click();
+			return false;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	private void exitBy2Click() {
+		Timer tExit = null;
+		if (isExit == false) {
+			isExit = true; // 准备退出
+			Util.Toast(MainActivity.this, "再按一下退出！！");
+			tExit = new Timer();
+			tExit.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					isExit = false; // 取消退出
+				}
+			}, 1500);
+
+		} else {
+			finish();
+			System.exit(0);
+		}
+	}
+
+}
+
+class MyVpAdapter extends PagerAdapter {
+	private FragmentManager fm;
+
+	public MyVpAdapter(FragmentManager fm) {
+		this.fm = fm;
+	}
+
+	@Override
+	public int getCount() {
+		return 2;
+	}
+
+	/**
+	 * 判断view与Object之间是否关联。就当是view的标识符。
+	 */
+	@Override
+	public boolean isViewFromObject(View arg0, Object arg1) {
+		return arg0 == ((Fragment) arg1).getView();
+	}
+
+	/**
+	 * 实例化视图。返回的object就是上面的object，就当是唯一标识符。就按网上的返回view。上面直接==也行
+	 */
+	@Override
+	public Object instantiateItem(ViewGroup container, int position) {
+		Fragment fragment = fm.findFragmentByTag(position + 10 + "");
+		container.addView(fragment.getView());
+		return fragment;
+	}
+
+	/**
+	 * 从视图容器中销毁指定视图。
+	 */
+	@Override
+	public void destroyItem(ViewGroup container, int position, Object object) {
+		container.removeView(((Fragment) object).getView());
+	}
+
+}

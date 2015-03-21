@@ -1,0 +1,285 @@
+package com.pinsheng.help;
+
+import java.util.List;
+
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationListener;
+import com.amap.api.location.LocationManagerProxy;
+import com.amap.api.location.LocationProviderProxy;
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.pinsheng.app.HELPActivity;
+import com.pinsheng.app.HELPApllication;
+import com.pinsheng.dialog.DialogSetupFragment;
+import com.pinsheng.map.SearchActivity;
+import com.pinsheng.mode.Person;
+import com.pinsheng.service.HelpService;
+import com.pinsheng.util.Util;
+import com.pinsheng.view.CircleView;
+import com.pinsheng.view.CircleView.OnCircleViewClickListener;
+import com.slider.slider_switch.Slider_Switch;
+import com.slider.slider_switch.Slider_Switch.OnChangedListener;
+
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.location.Location;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Vibrator;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+public class HELPFragment extends Fragment implements OnClickListener,
+		OnCircleViewClickListener, AMapLocationListener {
+	private TextView mLocationText;
+	private ImageView mImageView;
+	private CircleView mMainImageView;
+	private FragmentManager mFragmentManager;
+	private Intent intent;
+	private Slider_Switch shake_switch;
+	private RotateAnimation rotateAnimation;
+
+	// 获取地理位置
+	private LocationManagerProxy mLocationManagerProxy;
+	private static String str = null;
+	private static final String ADDTAG = "0";
+	private static final String PEOPLETAG = "1";
+	private Message msg;
+
+	private HelpService helpService;
+
+	private Handler handler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			switch (msg.what) {
+			case 1:
+				mLocationText.setText(str + "(点我刷新！)");
+				break;
+			case 2:
+				mLocationText.setText("无法获取 (点我刷新)");
+			}
+		}
+
+	};
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mFragmentManager = getFragmentManager();
+	//	intent = new Intent(getActivity(), HelpService.class);
+		initAnimation();
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.fragment_helps, container, false);
+		initView(v);
+		return v;
+	}
+
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()) {
+		case R.id.main_address_text:
+			mLocationText.setText(" 获取中...");
+			if (!Util.isNetWorkAvilable(getActivity())) {
+				Util.Toast(getActivity(), "网络异常,无法获取你所处的位置！");
+				mLocationText.setText("无法获取 (点我刷新)");
+			} else {
+				// 设置位置请求
+				mLocationManagerProxy.removeUpdates(this);
+				mLocationManagerProxy = LocationManagerProxy
+						.getInstance(getActivity());
+				mLocationManagerProxy.setGpsEnable(false);
+				mLocationManagerProxy.requestLocationData(
+						LocationProviderProxy.AMapNetwork, 5 * 60 * 1000, 15,
+						this);
+			}
+			break;
+		case R.id.img_earth:
+			intent.setClass(getActivity(), SearchActivity.class);
+			startActivity(intent);
+			break;
+
+		default:
+			break;
+		}
+
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		Log.i("response", "madan");
+	}
+
+	@Override
+	public void OnProgressAnimation(ImageView imageView) {
+		imageView.setVisibility(View.VISIBLE);
+		imageView.startAnimation(rotateAnimation);
+	}
+
+	@Override
+	public void OnCancleAnimation(ImageView imageView) {
+		rotateAnimation.cancel();
+		imageView.clearAnimation();
+		imageView.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void OnPersonClick(Person person) {
+		if (Util.QuickClick.isQuickClick()) {
+			return;
+		} else {
+			new DialogSetupFragment(person).show(mFragmentManager, PEOPLETAG);
+		}
+	}
+
+	@Override
+	public void OnMainClick() {
+		List<Person> person = ((HELPApllication) (getActivity()
+				.getApplication())).getPersons();
+		((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE))
+				.vibrate(new long[] { 500, 480, 500, 480 }, -1);
+		Util.Toast(getActivity(), "救命！！！");
+		if (person.size() == 0) {
+			Util.Toast(getActivity(), "你还没设置联系人呢...");
+		} else {
+			((Vibrator) getActivity()
+					.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(
+					new long[] { 500, 480, 500, 480 }, -1);
+			Util.send(getActivity(), person, ((MainActivity) getActivity())
+					.getWXApplication().getLocation());
+			Util.Call(getActivity(), person);
+		}
+	}
+
+	@Override
+	public void OnAddClick() {
+		if (Util.QuickClick.isQuickClick()) {
+			return;
+		} else {
+			new DialogSetupFragment().show(mFragmentManager, ADDTAG);
+		}
+	}
+
+	private void initView(View view) {
+		shake_switch = (Slider_Switch) view.findViewById(R.id.shake_switch);
+		mLocationText = (TextView) view.findViewById(R.id.main_address_text);
+		mImageView = (ImageView) view.findViewById(R.id.img_earth);
+		mMainImageView = (CircleView) view.findViewById(R.id.help_img);
+		mLocationText.setText("获取中...");
+		// 设置位置请求
+		mLocationManagerProxy = LocationManagerProxy.getInstance(getActivity());
+		mLocationManagerProxy.setGpsEnable(false);
+
+		if (!Util.isNetWorkAvilable(getActivity())) {
+			mLocationText.setText("无法获取 (点我刷新)");
+		} else {
+			mLocationManagerProxy.requestLocationData(
+					LocationProviderProxy.AMapNetwork, 5 * 60 * 1000, 15, this);
+		}
+		mMainImageView.setOnCircleViewClickListener(this);
+		mLocationText.setOnClickListener(this);
+		mImageView.setOnClickListener(this);
+		shake_switch.setChecked(((HELPApllication) (getActivity()
+				.getApplication())).isShakeOpen());
+		if (((HELPApllication) (getActivity().getApplication())).isShakeOpen()) {
+			Log.i("response", "----->shakeOpen");
+		}
+		shake_switch.setOnChangedListener(new OnChangedListener() {
+
+			@Override
+			public void OnChanged(Slider_Switch Slider, boolean checkState) {
+				if (checkState) {
+					Log.i("response", "---->shakeOpen");
+					getActivity().	startService(new Intent(getActivity(),
+							HelpService.class));
+					
+				} else {
+					Log.i("response", "---->shakeClose");
+					getActivity().	stopService(new Intent(getActivity(),
+							HelpService.class));
+					}
+					
+				((HELPApllication) (getActivity().getApplication()))
+						.setShakeOpen(checkState);
+			}
+		});
+		refreshPerson();
+	}
+
+	private void initAnimation() {
+		rotateAnimation = new RotateAnimation(0, 360,
+				Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
+				0.5f);
+		rotateAnimation.setDuration(500);
+	}
+
+	public void refreshPerson() {
+		mMainImageView.removeAllPerson();
+		mMainImageView.addPerson(((HELPApllication) getActivity()
+				.getApplication()).getPersons());
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+
+	}
+
+	@Override
+	public void onLocationChanged(AMapLocation amapLocation) {
+		Log.i("response", "onLocationChanged");
+		msg = new Message();
+		if (amapLocation != null
+				&& amapLocation.getAMapException().getErrorCode() == 0) {
+			str = amapLocation.getAddress();
+			((HELPActivity) getActivity()).getWXApplication().setLocation(str);
+			((HELPActivity) getActivity()).getWXApplication().setWeidu(
+					amapLocation.getLatitude());
+			((HELPActivity) getActivity()).getWXApplication().setJingdu(
+					amapLocation.getLongitude());
+			Log.i("response", ((HELPActivity) getActivity()).getWXApplication()
+					.getWeidu()
+					+ "\n"
+					+ ((HELPActivity) getActivity()).getWXApplication()
+							.getJingdu());
+			msg.what = 1;
+		} else {
+			msg.what = 2;
+		}
+		handler.sendMessage(msg);
+	}
+}
