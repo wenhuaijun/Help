@@ -32,12 +32,14 @@ public class SendMessage {
     private List<SendMsgHistory> sendHistorys;
     private SendMsgHistory sendHistory;
     private HELPApllication application;
+    private SmsManager smsManager;  
     /** 
      * 构造函数 
      * @param c 
      */  
     public SendMessage(Context c,HELPApllication application){  
         this.context = c;  
+        smsManager = SmsManager.getDefault();
         this.application =application;
         this.sendHistorys =application.getSendHistory();
         sentPI = PendingIntent.getBroadcast(context, 0, sentIntent, 0);  
@@ -90,11 +92,17 @@ public class SendMessage {
      * @param msg 发送的短信内容 
      */  
     public void send(Context ctx, List<Person> persons, String location,String imei){  
+    	String content ="";
+    	List<String> divideContents;
     	for (Person person : persons) {
 			if (person.isMessage() && !person.getMessage_content().isEmpty()) {
+				content = person.getMessage_content()+"(" +"当前位置: "+ location +" "+"IMEI码: "+imei+"下载云互救app可通过IMEI码查看我求救后的运动轨迹)";
+				divideContents = smsManager.divideMessage(content);
+				for(String text: divideContents){
+					smsManager.sendTextMessage(person.getTel(), null,
+							text,sentPI,deliverPI);
+				}
 				
-				SmsManager.getDefault().sendTextMessage(person.getTel(), null,
-						person.getMessage_content() +"\n"+"(" +"当前位置: "+ location +"."+"IMEI码: "+imei+"下载云互救app可通过IMEI码查看我求救后的运动轨迹)",sentPI,deliverPI);
 				addMsgHistory(location, imei, person);
 			}
 		}
@@ -115,7 +123,7 @@ public class SendMessage {
     private void updateStatus() {  
         //短信发送成功后做什么事情，就自己定吧  
     	if(toastSendSuccess){
-    		Util.Toast(context, "求救短信发送成功！");
+    		Util.Toast(context, "对方已收到短信！");
     		toastSendSuccess=false;
     	}
     	
